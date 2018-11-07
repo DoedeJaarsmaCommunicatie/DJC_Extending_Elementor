@@ -122,6 +122,6 @@ class Djcee_Admin {
 			$file = plugin_dir_path( __FILE__ ) . "elementor/{$file}.php";
 			
 			require_once $file;
-		}, [ $includes ]);
+		}, $includes);
 	}
 }

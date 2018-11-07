@@ -40,6 +40,9 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
+= 1.0.2 =
+* Bugfix in admin loader
+
 = 1.0.1 =
 * Plugin auto-updater toegevoegd
 
@@ -49,8 +52,11 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Upgrade Notice ==
 
+= 1.0.2 =
+!!Breaking bug opgelost, installeer deze versie om de plugin te blijven gebruiken.
+
 = 1.0.1 =
-Om de plugin automatisch te kunnen updaten raden wij aan om deze update te downloaden
+Om de plugin automatisch te kunnen updaten raden wij aan om deze update te downloaden.
 
 = 1.0 =
 Major release, update om gebruik te maken van alle nieuwe functies.
