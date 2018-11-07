@@ -117,7 +117,7 @@ final class DJC_related_loader extends \Elementor\Widget_Base
 					$button_add_class = '';
 					if( $settings['read_more_button_background'] === 'taxonomy')
 					{
-						$terms = wp_get_post_terms( $posts->post->ID, 'thema' );
+						$terms = wp_get_post_terms( $posts->post->ID, $settings['fetch_related_taxonomy'] );
 						
 						$button_add_class = $terms? $terms[0]->slug : '';
 					}
@@ -127,8 +127,8 @@ final class DJC_related_loader extends \Elementor\Widget_Base
 							<?php if( $settings['show_image'] === 'yes'): ?>
 								<div <?php print $this->get_render_attribute_string('project_card_media') ?>>
 									<img src="<?php print get_the_post_thumbnail_url() ?>" alt="<?php print get_the_title(); ?>" class="project_image">
-									<?php $term = \wp_get_post_terms( $posts->post->ID, 'thema' ); ?>
-									<div class="img_overlay_container" style="background: <?php print \get_field('primaire_kleur', 'category_' . $term[0]->term_id); ?>; opacity: 0.8;">
+									<?php $term = \wp_get_post_terms( $posts->post->ID, $settings['fetch_related_taxonomy'] ); ?>
+									<div class="img_overlay_container">
 										<img src="<?php if($term) print get_field('featured_image', 'category_' . $term[0]->term_id)['url']; ?>" class="img_overlay_thema_icon">
 									</div>
 								</div>
@@ -139,7 +139,7 @@ final class DJC_related_loader extends \Elementor\Widget_Base
 								</div>
 								<?php if( $settings['show_excerpt'] === 'yes'): ?>
 									<div class="project-card-content">
-										<?php print the_excerpt_max_charlength($settings['excerpt_length']); ?>
+										<?php # print the_excerpt_max_charlength($settings['excerpt_length']); ?>
 									</div>
 								<?php endif; ?>
 							</div>
@@ -303,7 +303,10 @@ final class DJC_related_loader extends \Elementor\Widget_Base
             [
 	            'label'     =>  __( 'Read more text', 'djcee' ),
 	            'type'      =>  \Elementor\Controls_Manager::TEXT,
-                'default'   =>  __( 'Bekijk project', 'djcee')
+				'default'   =>  __( 'Bekijk project', 'djcee'),
+				'condition'	=>	[
+					'display_style'	=>	'card'
+				],
             ]
         );
 		
@@ -315,7 +318,10 @@ final class DJC_related_loader extends \Elementor\Widget_Base
                 'options'   =>  [
                     'config'    =>  __( 'Settings', 'djcee' ),
                     'taxonomy'  =>  __( 'Category', 'djcee' )
-                ]
+				],
+				'condition'	=>	[
+					'display_style'	=>	'card'
+				],
             ]
         );
 		
@@ -329,16 +335,36 @@ final class DJC_related_loader extends \Elementor\Widget_Base
 			]
 		);
 		
-		if(  count(wp_get_post_terms( \get_queried_object_id(), 'thema' )) > 0 )
+		$taxonomies = get_object_taxonomies( get_post( get_queried_object_id() ) );
+
+		if( $taxonomies )
 		{
+			$tax = [];
+
+			foreach( $taxonomies as $taxonomy )
+			{
+				$tax [$taxonomy]= $taxonomy;
+			}
 			$this->add_control(
 				'fetch_related',
 				[
-					'label' => __( 'Fetch related knowledge', 'djcee' ),
+					'label' => __( 'Fetch relateds', 'djcee' ),
 					'type' => \Elementor\Controls_Manager::SWITCHER,
 					'label_on' => __( 'Yes', 'djcee' ),
 					'label_off' => __( 'No', 'djcee' ),
-					'default'   =>  1
+					'default'   =>  'yes'
+				]
+			);
+	
+			$this->add_control(
+				'fetch_related_taxonomy',
+				[
+					'label'     =>  __( 'Fetch on taxonomy:', 'djcee'),
+					'type'      =>  \Elementor\Controls_Manager::SELECT2,
+					'options'   =>  $tax,
+					'condition'	=>	[
+						'fetch_related'	=>	'yes'
+					]
 				]
 			);
 		}
@@ -1269,7 +1295,6 @@ final class DJC_related_loader extends \Elementor\Widget_Base
 					'type'  => \Elementor\Scheme_Color::get_type(),
 					'value' => \Elementor\Scheme_Color::COLOR_1,
 				],
-				'default'   =>  \wp_get_post_terms( \get_queried_object_id(), 'thema' )? get_field('primaire_kleur', 'term_' . \wp_get_post_terms( \get_queried_object_id(), 'thema' )[0]->term_id) : 'transparent',
 				'selectors' => [
 					'{{WRAPPER}} .list_container' => 'background-color: {{VALUE}}',
 				],
@@ -1433,6 +1458,8 @@ final class DJC_related_loader extends \Elementor\Widget_Base
 	 */
 	protected function fetchAllProjects()
 	{
+		$settings = $this->get_settings_for_display();
+
 		$args = [
 			'post_type'         =>  \get_post_type( \get_queried_object_id() ),
 			'post_status'       =>  'publish',
@@ -1442,17 +1469,17 @@ final class DJC_related_loader extends \Elementor\Widget_Base
 			'post__not_in'      =>  [ \get_queried_object_id() ]
 		];
 		
-		if(  count(wp_get_post_terms( \get_queried_object_id(), 'thema' )) > 0 )
+		if(  count(wp_get_post_terms( \get_queried_object_id(), $settings['fetch_related_taxonomy'] )) > 0 )
 		{
 			$args += [
 				'tax_query' => [
 					'relation' => 'OR',
 					[
-						'taxonomy' => 'thema',
+						'taxonomy' => $settings['fetch_related_taxonomy'],
 						'field'    => 'term_taxonomy_id',
 						'terms'    => array_map( function ( $value ) {
 							return $value->term_id;
-						}, wp_get_post_terms( \get_queried_object_id(), 'thema' ) )
+						}, wp_get_post_terms( \get_queried_object_id(), $settings['fetch_related_taxonomy'] ) )
 					]
 				]
 			];
@@ -1502,17 +1529,17 @@ final class DJC_related_loader extends \Elementor\Widget_Base
 			$args ['post__not_in']= [ \get_queried_object_id(), $settings['sticky_1'] ];
 		}
 		
-		if( isset($settings['fetch_related']) && count( \wp_get_post_terms( \get_queried_object_id(), 'thema' )) > 0 )
+		if( isset($settings['fetch_related']) && count( \wp_get_post_terms( \get_queried_object_id(), $settings['fetch_related_taxonomy'] )) > 0 )
 		{
 			$args += [
 				'tax_query' => [
 					'relation' => 'OR',
 					[
-						'taxonomy' => 'thema',
+						'taxonomy' => $settings['fetch_related_taxonomy'],
 						'field'    => 'term_taxonomy_id',
 						'terms'    => array_map( function ( $value ) {
 							return $value->term_id;
-						}, \wp_get_post_terms( \get_queried_object_id(), 'thema' ) )
+						}, \wp_get_post_terms( \get_queried_object_id(), $settings['fetch_related_taxonomy'] ) )
 					]
 				]
 			];

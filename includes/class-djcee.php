@@ -159,7 +159,7 @@ class Djcee {
 		/*
 		 * This loads the elementor widgets
 		 */
-		$this->loader->add_action( 'plugins_loaded', $plugin_admin, 'includes');
+		$this->loader->add_action( 'elementor/loaded', $plugin_admin, 'includes');
 
 	}
 

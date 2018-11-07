@@ -16,7 +16,7 @@
  * Plugin Name:       DJC Extending Elementor
  * Plugin URI:        https://doedejaarsma.nl
  * Description:       Deze plugin voegt verschillende widgets toe die in over het algemeen goed gebruikt kunnen worden bij projecten.
- * Version:           1.0.2
+ * Version:           1.0.3
  * Author:            Mitch Hijlkema
  * Author URI:        https://doedejaarsma.nl
  * License:           GPL-2.0+
@@ -35,7 +35,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'DJCEE_VERSION', '1.0.0' );
+define( 'DJCEE_VERSION', '1.0.3' );
 
 /**
  * The code that runs during plugin activation.
