@@ -1,6 +1,5 @@
 === Plugin Name ===
-Contributors: (this should be a list of wordpress.org userid's)
-Donate link: https://doedejaarsma.nl
+Contributors: elderbraum
 Tags: elementor, widgets, extension
 Requires at least: 4.9.8
 Tested up to: 4.9.8
@@ -41,15 +40,20 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 == Changelog ==
 
+= 1.0.1 =
+* Plugin auto-updater toegevoegd
+
 = 1.0 =
 * Control aangemaakt speciaal voor sticky posts selecteren
 * Widget toegevoegd waarmee gerelateerde en niet gerelateerde berichten opgehaald kunnen worden.
 
 == Upgrade Notice ==
 
+= 1.0.1 =
+Om de plugin automatisch te kunnen updaten raden wij aan om deze update te downloaden
+
 = 1.0 =
 Major release, update om gebruik te maken van alle nieuwe functies.
-
 
 == Handmatige updates ==
 

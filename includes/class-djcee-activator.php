@@ -29,8 +29,15 @@ class Djcee_Activator {
 	 *
 	 * @since    1.0.0
 	 */
-	public static function activate() {
+	public static function activate() 
+	{
+		if( defined( 'DJCEE_VERSION' ) ) :
 
+			update_option( 'DJCEE_VERSION', DJCEE_VERSION );
+		else:
+			
+			update_option( 'DJCEE_VERSION', '1.0.0');
+		endif;
 	}
 
 }

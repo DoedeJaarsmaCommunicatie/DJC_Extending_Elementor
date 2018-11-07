@@ -1,8 +1,6 @@
 # DJC Extending Elementor
 Contributors: elderbraum
 
-Donate link: https://doedejaarsma.nl
-
 Tags: elementor, widgets, extension
 
 Requires at least: 4.9.8
@@ -47,6 +45,9 @@ directory take precedence. For example, `/assets/screenshot-1.png` would win ove
 
 ## Changelog
 
+### 1.0.1
+* Plugin auto-updater toegevoegd
+  
 ### 1.0
 * Control aangemaakt speciaal voor sticky posts selecteren
 * Widget toegevoegd waarmee gerelateerde en niet gerelateerde berichten opgehaald kunnen worden.

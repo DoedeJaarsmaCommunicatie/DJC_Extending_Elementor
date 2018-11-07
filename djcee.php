@@ -16,7 +16,7 @@
  * Plugin Name:       DJC Extending Elementor
  * Plugin URI:        https://doedejaarsma.nl
  * Description:       Deze plugin voegt verschillende widgets toe die in over het algemeen goed gebruikt kunnen worden bij projecten.
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            Mitch Hijlkema
  * Author URI:        https://doedejaarsma.nl
  * License:           GPL-2.0+

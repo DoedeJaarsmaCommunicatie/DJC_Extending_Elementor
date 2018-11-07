@@ -77,6 +77,7 @@ class Djcee {
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
+		$this->check_for_updates();
 
 	}
 
@@ -114,6 +115,11 @@ class Djcee {
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-djcee-admin.php';
+
+		/**
+		 * The class responsible for updating the plugin.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'updates/plugin-update-checker.php';
 
 		$this->loader = new Djcee_Loader();
 
@@ -155,6 +161,17 @@ class Djcee {
 		 */
 		$this->loader->add_action( 'plugins_loaded', $plugin_admin, 'includes');
 
+	}
+
+	private function check_for_updates()
+	{
+		$updater = Puc_v4_Factory::buildUpdateChecker(
+			'https://github.com/DoedeJaarsmaCommunicatie/DJC_Extending_Elementor/',
+			plugin_dir_path( dirname( __FILE__ ) ) . 'djcee.php',
+			'djcee'
+		);
+
+		$updater->setBranch('master');
 	}
 
 	/**
