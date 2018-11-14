@@ -120,6 +120,10 @@ class Djcee {
 		 * The class responsible for updating the plugin.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'updates/plugin-update-checker.php';
+		
+		if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
+			require_once plugin_dir_path( dirname( __FILE__ ) ) . 'woocommerce/DJC_Elementor_WooCommerce_Extensions.php';
+		}
 
 		$this->loader = new Djcee_Loader();
 
@@ -157,9 +161,17 @@ class Djcee {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
 		/*
-		 * This loads the elementor widgets
+		 * This loads the Elementor widgets
 		 */
 		$this->loader->add_action( 'elementor/loaded', $plugin_admin, 'includes');
+		
+		/*
+		 * This loads the Elementor WooCommerce widgets
+		 */
+		if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
+			$elementor_woocommerce = new DJC_Elementor_WooCommerce_Extensions();
+			$this->loader->add_action( 'elementor/loaded', $elementor_woocommerce, 'includes');
+		}
 
 	}
 

@@ -86,7 +86,8 @@ final class DJC_related_loader extends \Elementor\Widget_Base
 	 */
 	protected function _render_classic()
 	{
-		$posts = $this->fetchRenderProjects(); ?>
+		$posts = $this->fetchRenderProjects(); 
+		if( $posts ) : ?>
 		<div class="list_container d-flex flex-column">
 			<?php while( $posts->have_posts() ): $posts->the_post(); ?>
 				
@@ -99,6 +100,7 @@ final class DJC_related_loader extends \Elementor\Widget_Base
 			endwhile;  wp_reset_postdata(); ?>
 		</div>
 		<?php
+		endif;
 	}
 	
 	/**
@@ -139,7 +141,7 @@ final class DJC_related_loader extends \Elementor\Widget_Base
 								</div>
 								<?php if( $settings['show_excerpt'] === 'yes'): ?>
 									<div class="project-card-content">
-										<?php # print the_excerpt_max_charlength($settings['excerpt_length']); ?>
+										<?php print $this->the_excerpt_max_charlength($settings['excerpt_length']); ?>
 									</div>
 								<?php endif; ?>
 							</div>
@@ -1548,5 +1550,24 @@ final class DJC_related_loader extends \Elementor\Widget_Base
 		$q = new \WP_Query( $args );
 		if( $q->have_posts() ) return $q;
 		return false;
+	}
+
+	protected function the_excerpt_max_charlength($charlength) {
+		$excerpt = get_the_excerpt();
+		$charlength++;
+		
+		if ( mb_strlen( $excerpt ) > $charlength ) {
+			$subex = mb_substr( $excerpt, 0, $charlength - 5 );
+			$exwords = explode( ' ', $subex );
+			$excut = - ( mb_strlen( $exwords[ count( $exwords ) - 1 ] ) );
+			if ( $excut < 0 ) {
+				echo mb_substr( $subex, 0, $excut );
+			} else {
+				echo $subex;
+			}
+			echo '[...]';
+		} else {
+			echo $excerpt;
+		}
 	}
 }

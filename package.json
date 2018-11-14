@@ -1,0 +1,78 @@
+{
+  "name": "djcee",
+  "version": "1.0.0",
+  "description": "A Elementor Extending Plugin",
+  "repository": "https://github.com/DoedeJaarsmaCommunicatie/DJC_Extending_Elementor",
+  "author": {
+    "name": "Mitch Hijlkema",
+    "email": "mitch@doedejaarsma.nl"
+  },
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "webpack --progress --config assets/build/webpack.config.js",
+    "lint": "npm run -s lint:styles",
+    "lint:styles": "stylelint \"./**/*.{css,sass,scss,sss,less}\"",
+    "lint:styles:fix": "stylelint \"./**/*.{css,sass,scss,sss,less}\" --fix"
+  },
+  "stylelint": {
+    "extends": "stylelint-config-standard",
+    "rules": {
+      "no-empty-source": null,
+      "at-rule-no-unknown": [
+        true,
+        {
+          "ignoreAtRules": [
+            "extend",
+            "at-root",
+            "debug",
+            "warn",
+            "error",
+            "if",
+            "else",
+            "for",
+            "each",
+            "while",
+            "mixin",
+            "include",
+            "content",
+            "return",
+            "function"
+          ]
+        }
+      ]
+    }
+  },
+  "engines": {
+    "node": ">= 8.9.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.1",
+    "@babel/preset-env": "^7.1",
+    "autoprefixer": "^9.3",
+    "babel-loader": "^8.0",
+    "cache-loader": "^1.2",
+    "css-loader": "^1.0",
+    "cssnano": "^4.1.7",
+    "eslint": "^5.9",
+    "eslint-loader": "^2.1",
+    "eslint-plugin-import": "^2.14",
+    "eslint-plugin-vue": "^5.0.0-beta.4",
+    "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "file-loader": "^2.0",
+    "friendly-errors-webpack4-plugin": "^2.0",
+    "import-glob": "^1.5",
+    "rimraf": "^2.6",
+    "node-sass": "^4.10.0",
+    "postcss-loader": "^3.0.0",
+    "sass-loader": "^7.1",
+    "style-loader": "^0.23",
+    "stylelint": "^8.4.0",
+    "stylelint-config-standard": "~18.2",
+    "stylelint-webpack-plugin": "^0.10",
+    "resolve-url-loader": "^3.0.0",
+    "webpack": "^4.25",
+    "webpack-cli": "^3.1.2",
+    "webpack-merge": "^4.1"
+  }
+}

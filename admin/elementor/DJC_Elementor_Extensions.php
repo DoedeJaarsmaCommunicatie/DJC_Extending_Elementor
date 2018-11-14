@@ -2,7 +2,7 @@
 
 class DJC_Elementor_Extensions {
 
-    const VERSION = '1.0.0';
+    const VERSION = '1.0.3';
 	
 	const MINIMUM_ELEMENTOR_VERSION = '1.0.0';
 	
