@@ -100,8 +100,7 @@ let webpackConfig = {
                     limit: 4096,
                     name: `[path]${assetsFilenames}.[ext]`,
                 },
-            },
-
+            }
         ],
     },
     resolve: {

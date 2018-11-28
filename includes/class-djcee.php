@@ -123,6 +123,8 @@ class Djcee {
 		
 		if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
 			require_once plugin_dir_path( dirname( __FILE__ ) ) . 'woocommerce/DJC_Elementor_WooCommerce_Extensions.php';
+			require_once plugin_dir_path( __DIR__ ) . 'woocommerce/ajax/DJC_Ajax_ProductLoader.php';
+			require_once plugin_dir_path( __DIR__ ) . 'woocommerce/filters/DJC_WooCommerce_Filters.php';
 		}
 
 		$this->loader = new Djcee_Loader();
@@ -168,7 +170,7 @@ class Djcee {
 		/*
 		 * This loads the Elementor WooCommerce widgets
 		 */
-		if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
+		if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ), true ) ) {
 			$elementor_woocommerce = new DJC_Elementor_WooCommerce_Extensions();
 			$this->loader->add_action( 'elementor/loaded', $elementor_woocommerce, 'includes');
 		}

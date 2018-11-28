@@ -1,8 +1,5 @@
 {
-  "entry": {
-    "woocommerce/js/dist/wc": "./woocommerce/js/asset/ondex.js",
-    "woocommerce/css/dist/wc" : "./woocommerce/css/main.scss"
-  },
+  "entry": {},
   "publicPath": "/wp-content/plugins/djcee",
   "devUrl": "http://localhost:9980",
   "proxyUrl": "http://localhost:3000",
