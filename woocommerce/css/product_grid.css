@@ -1,0 +1,15 @@
+.djcee__filter__container__full {
+  display: grid;
+  grid-template-areas: "aside main";
+  grid-template-columns: 33% 66%;
+}
+
+.djc__filter__full__aside {
+  grid-area: aside;
+}
+
+.djc__filter__full__main {
+  grid-area: main;
+}
+
+/*# sourceMappingURL=product_grid.css.map */

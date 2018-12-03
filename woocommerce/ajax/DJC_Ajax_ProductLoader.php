@@ -111,11 +111,12 @@ class DJC_Ajax_ProductLoader {
 			],
 		];
 		
-		$this->request = $_POST['data'];
+		$this->request = $_POST['data']['filter'];
 		# 0 => array (size=2) 'filter' => string 'category' (length=8) 'filtrate' => string 'wit' (length=3)
 		
-		$this->filters = array_unique( $this->request[0]['filters'] );
-		
+		$this->filters = explode(',', $_POST['data']['helpers']['filters']);
+//		print_r( $this->filters ); die;
+	
 	}
 	
 	/**
@@ -271,6 +272,9 @@ class DJC_Ajax_ProductLoader {
 		}
 	}
 	
+	/**
+	 * @return void
+	 */
 	private function the_meta_loop() {
 		foreach($this->filters as $filter) {
 			$terms = \get_terms(
@@ -280,6 +284,7 @@ class DJC_Ajax_ProductLoader {
 				]
 			);
 			$this->response [ 'data' ] [ 'filters' ] []= $terms;
+			
 		}
 		
 		$this->response [ 'data' ] [ 'used' ] [ 'filters' ] = $this->filters;

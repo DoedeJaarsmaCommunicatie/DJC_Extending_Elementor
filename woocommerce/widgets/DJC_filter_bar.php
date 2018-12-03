@@ -8,6 +8,8 @@
 
 final class DJC_filter_bar extends \Elementor\Widget_Base {
 	
+	private $is_added_product_filter = false;
+	
 	public function get_name()
 	{
 		return 'filter_bar';
@@ -33,6 +35,7 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
 	    $this->add_script_depends( 'limiter_djcee_script' );
 	    $this->add_script_depends( 'wp_filter_djcee_script' );
 	    $this->add_style_depends( 'limiter_djcee_style' );
+	    $this->add_style_depends( 'wp_filter_full_style_grid');
     }
     
 	protected function _register_controls()
@@ -50,6 +53,21 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
 	protected function render()
 	{
 		$settings = $this->get_settings_for_display();
+		$filter_list = [];
+		
+		foreach( $settings['filter_list'] as $filter)
+        {
+            if( $filter['filter_type'] === 'product_att' )
+            {
+	            $attribute = wc_get_attribute( $filter['product_attribute'] );
+	            $filter_list['attributes'] []= $attribute->slug;
+            }
+            
+            if( $filter['filter_type'] === 'product_cat' )
+            {
+                $filter_list['categories'] []= null;
+            }
+        }
 		
 		if( $settings['display_style'] === 'list' )
 		{
@@ -67,13 +85,43 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
                 </form>
             <?php
         }
+		
+		if( $settings['display_style'] === 'full' )
+        {
+	        ?>
+            <section class="djcee__filter__container__full">
+                <aside class="djc__filter__full__aside">
+                    <form class="js-filter-page-filter-form" id="filter_<?=get_the_ID()?>"
+                          data-filter-target="<?=$settings['form_target_class']?? 'js__target__filter__container'?>"
+                          data-wordpress-filter="<?=$settings['wp_filter_product']?>"
+                          data-filter-attributes-list="<?=implode(',', $filter_list['attributes'])?>"
+                          <?php if( isset( $filter_list['categories'] ) ) : ?>
+                          data-filter-categories-list="<?=implode(',', $filter_list['categories'])?>"
+                          <?php endif; ?>
+                    >
+		                <?php
+		                foreach($settings['filter_list'] as $filter)
+		                {
+			                if( $filter['filter_type'] === 'product_cat' )
+				                $this->_render_categories_template( $filter );
+			                if( $filter['filter_type'] === 'product_att' )
+				                $this->_render_attribute_template( $filter['product_attribute'], $filter);
+		                }
+		                ?>
+                    </form>
+                </aside>
+                <main class="js__target__filter__container djc__filter__full__main">
+                    <?php $this->_render_product_template(); ?>
+                </main>
+            </section>
+	        <?php
+        }
 	}
 	
 	protected function _content_template()
 	{
 		parent::_content_template();
 	}
-	
 	
 	final private function _render_categories_template($filter_data)
 	{
@@ -104,14 +152,13 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
 		<?php
 	}
 	
-	private function _render_attribute_template($id, $filter)
+	final private function _render_attribute_template($id, $filter)
 	{
 		$settings = $this->get_settings_for_display();
 		
 		$attribute = wc_get_attribute( $id );
 		if( $attribute !== null) :
 		$terms = get_terms( $attribute->slug );
-		WP_DEBUG? var_dump( $terms ) : null;
 		?>
 		<section  class="js-target__section__filter" data-filter-name="<?=$attribute->slug?>">
 			<h2><?= __( $filter['filter_title'], 'djcee') ?></h2>
@@ -120,9 +167,8 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
 					<li>
 						<input type="checkbox" data-filtrate="<?= $term->slug ?>" data-filter="<?= $attribute->slug ?>" id="term-<?= $term->slug ?>" />
 						<label for="term-<?= $term->slug ?>">
-						<!-- <span class="term_count term_count_<?=$attribute->slug?>" id="term_count_<?=$term->slug?>" data-filter-slug="<?=$attribute->slug?>" data-filtrate-slug="<?=$term->slug?>"><?= $term->count ?></span> -->
-							<?= $term->name ?>
-						</label>
+							<?=$term->name?>
+                        </label>
 					</li>
 				<?php endforeach; ?>
             <button class="js-toggle__button__hidden" data-toggle-arrow="<?=$attribute->slug?>"><?= $settings['delimiter'] ?></button>
@@ -132,6 +178,22 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
         <?php
         endif;
 	}
+	
+	final private function _render_product_template()
+    {
+        $settings = $this->get_settings_for_display();
+        $the_query = $this->djc_fetch_all_products();
+	
+	    if( $the_query->have_posts() ) :
+            while( $the_query->have_posts() ) :
+                
+                $the_query->the_post();
+
+	            print \apply_filters($settings['wp_filter_product'], $the_query->post, 4);
+
+            endwhile;
+        endif;
+    }
 	
 	private function djc_filter_content_section()
 	{
@@ -161,7 +223,6 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
 		$this->end_controls_section();
 	}
 	
-	
 	/*
 	 * Content controls section
 	 */
@@ -172,7 +233,8 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
 				'label'     =>  __( 'Display Style', 'djcee'),
 				'type'      =>  \Elementor\Controls_Manager::SELECT2,
 				'options'   =>  [
-					'list'      =>  __( 'List', 'djcee')
+					'list'      =>  __( 'List', 'djcee'),
+                    'full'      =>  __( 'Full', 'djcee'),
 				],
 				'default'   =>  'list'
 			]
@@ -187,13 +249,16 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
             ]
         );
 		
-		$this->add_control('form_target_class',
-            [
-                'label'         =>  __( 'Target', 'djcee' ),
-                'type'          =>  \Elementor\Controls_Manager::TEXT,
-                'default'       =>  'js__target__filter__container',
-            ]
-        );
+//		$this->add_control('form_target_class',
+//            [
+//                'label'         =>  __( 'Target', 'djcee' ),
+//                'type'          =>  \Elementor\Controls_Manager::TEXT,
+//                'default'       =>  'js__target__filter__container',
+//                'condition'     =>  [
+//                        'display_style' =>  'list'
+//                ]
+//            ]
+//        );
 		
 		$this->add_control('wp_filter_product',
             [
@@ -283,4 +348,40 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
 		}
 		return $arr;
 	}
+	
+	/**
+	 * @return WP_Query
+	 */
+	protected function djc_fetch_all_products()
+    {
+        
+        if( $this->is_added_product_filter )
+        {
+            remove_action( 'pre_get_posts', [ wc()->query, 'product_query' ] );
+        }
+        
+        return new WP_Query( $this->parse_query_args() );
+    }
+    
+    protected function parse_query_args()
+    {
+        $query_args = [
+            'post_type'             =>  'product',
+            'post_status'           =>  'publish',
+            'ignore_sticky_posts'   =>  true,
+        ];
+        
+        if( !is_page( wc_get_page_id( 'shop' ) ) )
+        {
+            $query_args = $GLOBALS['wp_query']->query_vars;
+	        add_action( 'pre_get_posts', [ wc()->query, 'product_query' ] );
+	        $this->is_added_product_filter = true;
+        }
+        
+	
+	    $query_args['fields'] = 'ids';
+        $query_args['posts_per_page'] = 999;
+        return $query_args;
+        
+    }
 }

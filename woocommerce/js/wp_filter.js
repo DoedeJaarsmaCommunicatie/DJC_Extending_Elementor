@@ -10,6 +10,7 @@ class Filter {
         this._elements = document.querySelectorAll('[data-filter]')
         this._target_field = document.querySelector('.js-filter-page-filter-form').dataset.filterTarget
         this._wordpress_filter = document.querySelector('.js-filter-page-filter-form').dataset.wordpressFilter
+        this._limit_target = "data-limit"
     }
 
     addClickers() {
@@ -41,26 +42,25 @@ class Filter {
     }
 
     fetchAllFilters() {
-        document.querySelectorAll('.js-target__section__filter').forEach( element => {
-            this._filters.push(element.dataset.filterName)
-        })
+        this._filters = document.querySelector('[data-filter-attributes-list]').dataset.filterAttributesList
     }
 
     async ajaxRequest($checked) {
-        let data = []
+        let data = {filter: []}
 
         this.fetchAllFilters()
 
         $checked.forEach( el => {
-            // Parameters el.dataset.filter, el.dataset.filtrate
-
-            data.push({
+            data.filter.push({
                 filter: el.dataset.filter,
                 filtrate: el.dataset.filtrate,
-                wp_filter: this._wordpress_filter,
-                filters: this._filters
             })
         })
+
+        data.helpers = {
+            wp_filter: this._wordpress_filter,
+            filters: this._filters,
+        }
 
         const meta = {
             action: 'filtered_callback',
@@ -68,26 +68,46 @@ class Filter {
         }
 
         await jQuery.post(djcee_ajax_object.ajax_url, meta, response => {
-            this.fillTheContent(response.data)
-            // this.fixTheFilters(response.data)
+            if( response ) {
+                this.fillTheContent(response.data)
+                this.fixTheFilters(response.data)
+            }
         })
     }
 
     fillTheContent(content) {
-        document.querySelector(`.${this._target_field}`).innerHTML = `${content.posts.data}`
+        if( content ) {
+            document.querySelector(`.${this._target_field}`).innerHTML = `${content.posts.data}`
+        }
     }
 
     fixTheFilters(filter) {
+
+        let existing_filters = []
+
         filter.filters.forEach( filterList => {
             filterList.forEach( filter => {
-                console.log( filter.slug )
+                if( !existing_filters[filter.taxonomy]) {
+                    existing_filters[filter.taxonomy] = []
+                }
+                existing_filters[filter.taxonomy].push(filter.slug)
             })
         })
-    }
-}
 
-// jQuery.post(djcee_ajax_object.ajax_url, { action: 'filtered_callback' } , (response) => {
-//     console.log(response)
-// })
+        for(let key in existing_filters)
+        {
+            let $container = document.querySelector(`[data-filter="${key}"]`).parentNode.parentNode
+
+            $container.querySelectorAll('li').forEach( el => {
+                el.classList.add('js-list__item__hidden')
+            })
+
+            existing_filters[key].forEach( active => {
+                $container.querySelector(`[data-filtrate="${active}"]`).parentNode.classList.remove('js-list__item__hidden')
+            })
+        }
+    }
+
+}
 
 new Filter()

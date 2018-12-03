@@ -9,13 +9,8 @@
 class DJC_WooCommerce_Filters {
 	
 	public function __construct() {
-		if( !has_filter('create_product_card') ) {
-			add_filter('create_product_card', [ $this, 'product_card_filter' ], 10, 2);
-		}
-		
-		if( !has_filter('create_product_form' ) ) {
-			add_filter('create_product_form', [ $this, 'product_form_filter'], 10, 3 );
-		}
+//		add_filter('create_product_card', [ $this, 'product_card_filter' ], 10, 2);
+//		add_filter('create_product_form', [ $this, 'product_form_filter'], 10, 3 );
 	}
 	
 	public function product_card_filter($product_id, $size = 3)

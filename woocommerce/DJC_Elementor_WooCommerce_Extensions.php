@@ -70,6 +70,7 @@ class DJC_Elementor_WooCommerce_Extensions {
 		wp_register_script( 'limiter_djcee_script', plugin_dir_url( __FILE__ ) . 'js/limiter.js', [], 2018.11, true);
 		wp_register_script( 'wp_filter_djcee_script', plugin_dir_url( __FILE__ ) . 'js/wp_filter.js', [], 2018.11, true);
 		wp_register_style( 'limiter_djcee_style', plugin_dir_url( __FILE__ ) . 'css/wp_filter.css', 2018.11, true);
+		wp_register_style( 'wp_filter_full_style_grid', plugin_dir_url( __FILE__ ) . 'css/product_grid.css', 2018.11, true);
 		
 		wp_localize_script( 'wp_filter_djcee_script', 'djcee_ajax_object',
 			[ 'ajax_url' => admin_url( 'admin-ajax.php' ) ] );
