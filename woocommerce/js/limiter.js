@@ -8,6 +8,7 @@ class Limiter {
         const elements = document.querySelectorAll(`[${this._target}]`)
         
         elements.forEach( (element) => {
+
             let thisLimit = element.dataset.limit
             this.hideEmAll(element, thisLimit)
         })
@@ -57,5 +58,7 @@ class Limiter {
 
 }
 
-new Limiter().gottaFindEmAll()
+document.addEventListener('DOMContentLoaded', () => {
+    new Limiter().gottaFindEmAll()
+})
 // Uncomment ^ for production and limiter testing.

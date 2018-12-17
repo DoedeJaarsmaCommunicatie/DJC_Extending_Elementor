@@ -11,9 +11,9 @@
  *
  * Class DJC_Ajax_ProductLoader
  *
- * @author Mitch Hijlkema <mitch@hijlkema.xyz>
+ * @author Mitch Hijlkema <mitch@hijlkema.me>
  * @since 1.0.4
- * @copyright Mitch Hijlkema <mitch@hijlkema.xyz>
+ * @copyright Mitch Hijlkema <mitch@hijlkema.me>
  * @license GPL-3.0-or-later
  * @version 2.0.0
  */
@@ -89,7 +89,6 @@ class DJC_Ajax_ProductLoader {
 	{
 		add_action( 'wp_ajax_filtered_callback', [ $this, 'filtered_callback' ] );
 		add_action( 'wp_ajax_nopriv_filtered_callback', [ $this, 'filtered_callback' ] );
-
 	}
 	
 	/**
@@ -97,7 +96,8 @@ class DJC_Ajax_ProductLoader {
 	 *
 	 * @return void
 	 */
-	private function init() {
+	private function init(): void
+	{
 		$this->query_args = [
 			'post_type'         => [ 'product' ],
 			'posts_per_page'    => -1,
@@ -126,7 +126,8 @@ class DJC_Ajax_ProductLoader {
 	 * @uses $filtered_data
 	 * @return void
 	 */
-	private function filterRequest() {
+	private function filterRequest(): void
+	{
 		
 		foreach( $this->request as $d )
 		{
@@ -145,7 +146,8 @@ class DJC_Ajax_ProductLoader {
 	 * @uses $query_args
 	 * @return void
 	 */
-	private function paFilter() {
+	private function paFilter(): void
+	{
 		foreach( $this->preg_grep_keys( '/^pa_/', $this->filtered_data) as $meta_key => $values)
 		{
 			$this->meta_keys []= $meta_key;
@@ -167,7 +169,8 @@ class DJC_Ajax_ProductLoader {
 	 * @uses $query_args
 	 * @return void
 	 */
-	private function categoryFilter() {
+	private function categoryFilter(): void
+	{
 		if( isset($this->filtered_data['category'] ) )
 		{
 			foreach ($this->filtered_data['category'] as $category)
@@ -188,7 +191,8 @@ class DJC_Ajax_ProductLoader {
 	 * @uses $query_args
 	 * @return void
 	 */
-	private function priceFilter() {
+	private function priceFilter(): void
+	{
 		if( isset($this->filtered_data['price_tot'] ) )
 		{
 			foreach ($this->filtered_data['price_tot'] as $price)
@@ -236,7 +240,8 @@ class DJC_Ajax_ProductLoader {
 	 * @uses $the_query
 	 * @return void
 	 */
-	private function query() {
+	private function query(): void
+	{
 //		print "<pre>";
 //		print_r($this->args);
 //		print "</pre>";
@@ -256,7 +261,8 @@ class DJC_Ajax_ProductLoader {
 	 * @uses $response
 	 * @return void
 	 */
-	private function the_loop() {
+	private function the_loop(): void
+	{
 		if( $this->the_query->have_posts() )
 		{
 			while( $this->the_query->have_posts() )
@@ -267,7 +273,10 @@ class DJC_Ajax_ProductLoader {
 				
 				$this->response [ 'data' ] ['posts'] ['data'] []= \apply_filters('create_product_card', $this->the_query->post->ID, 4);
 			}
+			
 			$this->response [ 'data' ] [ 'posts' ] ['count'] = $this->the_query->post_count;
+			
+			$this->response [ 'data' ] [ 'used' ] [ 'post_ids' ] = $this->filtered_posts;
 			\wp_reset_postdata();
 		}
 	}
@@ -275,7 +284,8 @@ class DJC_Ajax_ProductLoader {
 	/**
 	 * @return void
 	 */
-	private function the_meta_loop() {
+	private function the_meta_loop(): void
+	{
 		foreach($this->filters as $filter) {
 			$terms = \get_terms(
 				[
@@ -288,8 +298,6 @@ class DJC_Ajax_ProductLoader {
 		}
 		
 		$this->response [ 'data' ] [ 'used' ] [ 'filters' ] = $this->filters;
-		
-		
 	}
 	
 	/**
@@ -298,7 +306,8 @@ class DJC_Ajax_ProductLoader {
 	 * @uses the_loop()
 	 * @uses \wp_die() to signal the data is final for response
 	 */
-	protected function respond() {
+	protected function respond(): void
+	{
 		
 		$this->the_loop();
 		
@@ -310,7 +319,7 @@ class DJC_Ajax_ProductLoader {
 	/**
 	 * This function is called when the ajax request is made
 	 */
-	public function filtered_callback()
+	public function filtered_callback(): void
 	{
 		\ob_clean();
 		

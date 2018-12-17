@@ -71,13 +71,25 @@ class Filter {
             if( response ) {
                 this.fillTheContent(response.data)
                 this.fixTheFilters(response.data)
+                this.showACountOfProducts(response.data)
             }
         })
     }
 
     fillTheContent(content) {
         if( content ) {
-            document.querySelector(`.${this._target_field}`).innerHTML = `${content.posts.data}`
+            document.querySelector(`.${this._target_field}`).innerHTML = ''
+            content.posts.data.forEach( element => {
+                document.querySelector(`.${this._target_field}`).insertAdjacentHTML( 'beforeend', element )
+            })
+        }
+    }
+
+    showACountOfProducts( content) {
+        if(content) {
+            let span = document.querySelector('.js__target__count')
+            let string = span.dataset.string
+            span.innerHTML = `${content.posts.count} ${string}`
         }
     }
 
@@ -108,6 +120,9 @@ class Filter {
         }
     }
 
+    log(msg) {
+        console.log(msg)
+    }
 }
 
 new Filter()

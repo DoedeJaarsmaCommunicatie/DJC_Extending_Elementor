@@ -10,6 +10,13 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
 	
 	private $is_added_product_filter = false;
 	
+	private $product_count = 0;
+	
+	/**
+	 * @var WP_Query
+	 */
+	private $the_query;
+	
 	public function get_name()
 	{
 		return 'filter_bar';
@@ -34,6 +41,7 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
     {
 	    $this->add_script_depends( 'limiter_djcee_script' );
 	    $this->add_script_depends( 'wp_filter_djcee_script' );
+	    $this->add_script_depends( 'wp_sort_djcee_script' );
 	    $this->add_style_depends( 'limiter_djcee_style' );
 	    $this->add_style_depends( 'wp_filter_full_style_grid');
     }
@@ -46,12 +54,19 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
 		/*
 		 * TODO: Add styling section
 		 * FIXME: Filter counts need to update
+		 *   For now this does not update fully.
 		 * FIXME: Filter needs to remove empty
+		 *   This works via hides now. Needs the extra ajax call.
+		 * TODO: Make multiple ajax calls when filtering
+		 *   One for filters available
+		 *   One for products
+		 * TODO: Make an ajax call for sorting the products
 		 */
 	}
 	
 	protected function render()
 	{
+		$this->includes();
 		$settings = $this->get_settings_for_display();
 		$filter_list = [];
 		
@@ -88,6 +103,7 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
 		
 		if( $settings['display_style'] === 'full' )
         {
+            $this->djc_fetch_all_products();
 	        ?>
             <section class="djcee__filter__container__full">
                 <aside class="djc__filter__full__aside">
@@ -110,8 +126,23 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
 		                ?>
                     </form>
                 </aside>
-                <main class="js__target__filter__container djc__filter__full__main">
-                    <?php $this->_render_product_template(); ?>
+                <main class="djc__filter__full__main">
+                    <aside class="djc__filter__full__top_bar d-flex justify-content-between">
+                        <p>
+                        <span class="js__target__count" data-count="<?=$this->the_query->post_count?>" data-string="<?=__('producten gevonden', 'djcee')?>">
+                            <?=$this->the_query->post_count?> <?=__('producten gevonden', 'djcee')?>
+                        </span>
+                        </p>
+                        <form action="#">
+                            <select name="orderby" id="orderby" class="js__filter__order_by">
+                                <option value="title:asc">Name ascending</option>
+                                <option value="title:desc">Name descending</option>
+                            </select>
+                        </form>
+                    </aside>
+                    <section class="js__target__filter__container">
+	                    <?php $this->_render_product_template(); ?>
+                    </section>
                 </main>
             </section>
 	        <?php
@@ -135,12 +166,20 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
 		$categories = get_categories( $args );
 		
 		?>
-		<section>
+		<section class="js-target__section__filter" data-filter-name="product_cat">
 			<h2><?= __( $filter_data['filter_title'], 'djcee' ) ?></h2>
 			<ul>
 				<?php foreach($categories as $category): ?>
 				<li>
-					<input type="checkbox" data-filtrate="<?= $category->slug ?>" data-filter="product_cat" id="category-<?= $category->slug ?>" />
+					<input type="checkbox" data-filtrate="<?= $category->slug ?>" data-filter-facet="product_cat:<?=$category->slug?>" data-filter="product_categorie[]" id="category-<?= $category->slug ?>"
+                    <?php if( $category->slug === get_query_var( 'product_cat' ) ) {
+                        print 'checked';
+                    }
+                    if( in_array( $category->slug, get_query_var( 'product_categorie' ) ) )
+                    {
+                      print 'checked';
+                    } ?>
+                    />
 					<label for="category-<?= $category->slug ?>">
 						<?= $category->name ?>
 					</label>
@@ -165,7 +204,11 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
 			<ul data-limit="<?= $filter['limit']['size'] ?>" data-toggle-target="<?=$attribute->slug?>">
 				<?php foreach($terms as $term): ?>
 					<li>
-						<input type="checkbox" data-filtrate="<?= $term->slug ?>" data-filter="<?= $attribute->slug ?>" id="term-<?= $term->slug ?>" />
+						<input type="checkbox" data-filtrate="<?= $term->slug ?>" data-filter-facet="<?=$attribute->slug?>:<?=$term->slug?>" data-filter="<?= $attribute->slug ?>[]" id="term-<?= $term->slug ?>"
+                               <?php if( in_array( $term->slug, get_query_var( $attribute->slug ), true ) ) {
+                                   print 'checked';
+                               } ?>
+                        />
 						<label for="term-<?= $term->slug ?>">
 							<?=$term->name?>
                         </label>
@@ -179,17 +222,24 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
         endif;
 	}
 	
+	final private function _product_order_options()
+    {
+        return [
+                'name:asc'  =>  __('Name Ascending', 'djcee'),
+                'name:desc'  =>  __('Name Descending', 'djcee'),
+        ];
+    }
+	
 	final private function _render_product_template()
     {
         $settings = $this->get_settings_for_display();
-        $the_query = $this->djc_fetch_all_products();
 	
-	    if( $the_query->have_posts() ) :
-            while( $the_query->have_posts() ) :
+	    if( $this->the_query->have_posts() ) :
+            while( $this->the_query->have_posts() ) :
                 
-                $the_query->the_post();
-
-	            print \apply_filters($settings['wp_filter_product'], $the_query->post, 4);
+                $this->the_query->the_post();
+                
+	            print \apply_filters($settings['wp_filter_product'], $this->the_query->post, 4);
 
             endwhile;
         endif;
@@ -359,16 +409,24 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
         {
             remove_action( 'pre_get_posts', [ wc()->query, 'product_query' ] );
         }
-        
-        return new WP_Query( $this->parse_query_args() );
+        $this->the_query = new WP_Query( $this->parse_query_args() );
+        return $this->the_query;
     }
     
     protected function parse_query_args()
     {
+        $meta_args = $this->djc_all_product_attributes();
+        
         $query_args = [
             'post_type'             =>  'product',
             'post_status'           =>  'publish',
             'ignore_sticky_posts'   =>  true,
+            'tax_query'             => [
+                    'relation'          => 'OR',
+            ],
+            'meta_query'            =>  [
+            
+            ]
         ];
         
         if( !is_page( wc_get_page_id( 'shop' ) ) )
@@ -378,6 +436,35 @@ final class DJC_filter_bar extends \Elementor\Widget_Base {
 	        $this->is_added_product_filter = true;
         }
         
+        if( get_query_var( 'product_cat' ) )
+        {
+	        $query_args['tax_query'] []= [
+		        'taxonomy'  => 'product_cat',
+		        'field'     => 'slug',
+		        'terms'     => get_query_var('product_cat')
+	        ];
+        }
+        
+        if( get_query_var( 'product_categorie' ) )
+        {
+	        $query_args['tax_query'] []= [
+		        'taxonomy'  => 'product_cat',
+		        'field'     => 'slug',
+		        'terms'     => get_query_var('product_categorie')
+	        ];
+        }
+        
+        foreach( $meta_args as $pa_val => $pa_name)
+        {
+            if( get_query_var( "pa_$pa_name" ) )
+            {
+                $query_args['tax_query'] []= [
+                    'taxonomy'  => "pa_$pa_name",
+                    'field'     => 'slug',
+                    'terms'     => get_query_var( "pa_$pa_name" ),
+                ];
+            }
+        }
 	
 	    $query_args['fields'] = 'ids';
         $query_args['posts_per_page'] = 999;

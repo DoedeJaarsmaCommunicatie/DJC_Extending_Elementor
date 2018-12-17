@@ -124,6 +124,7 @@ class Djcee {
 		if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
 			require_once plugin_dir_path( dirname( __FILE__ ) ) . 'woocommerce/DJC_Elementor_WooCommerce_Extensions.php';
 			require_once plugin_dir_path( __DIR__ ) . 'woocommerce/ajax/DJC_Ajax_ProductLoader.php';
+			require_once plugin_dir_path( __DIR__ ) . 'woocommerce/ajax/DJC_Ajax_ProductSorter.php';
 			require_once plugin_dir_path( __DIR__ ) . 'woocommerce/filters/DJC_WooCommerce_Filters.php';
 		}
 

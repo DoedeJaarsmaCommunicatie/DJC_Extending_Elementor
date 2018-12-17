@@ -32,6 +32,7 @@ class DJC_Elementor_WooCommerce_Extensions {
 		add_action( 'plugins_loaded', [ $this, 'init' ] );
 		
 		add_action( 'elementor/elements/categories_registered', [ $this, 'add_elementor_widget_categories'] );
+		add_filter( 'query_vars', [ $this, 'add_query_vars'] );
 	}
 	
 	public function i18n()
@@ -68,11 +69,14 @@ class DJC_Elementor_WooCommerce_Extensions {
 	
 	public function includes() {
 		wp_register_script( 'limiter_djcee_script', plugin_dir_url( __FILE__ ) . 'js/limiter.js', [], 2018.11, true);
-		wp_register_script( 'wp_filter_djcee_script', plugin_dir_url( __FILE__ ) . 'js/wp_filter.js', [], 2018.11, true);
-		wp_register_style( 'limiter_djcee_style', plugin_dir_url( __FILE__ ) . 'css/wp_filter.css', 2018.11, true);
-		wp_register_style( 'wp_filter_full_style_grid', plugin_dir_url( __FILE__ ) . 'css/product_grid.css', 2018.11, true);
+		wp_register_script( 'wp_filter_djcee_script', plugin_dir_url( __FILE__ ) . 'js/wp_filter_refresh.js', [], 2018.11, true);
+		wp_register_script( 'wp_sort_djcee_script', plugin_dir_url( __FILE__ ) . 'js/wp_sort.js', [], 2018.12, true);
+		wp_register_style( 'limiter_djcee_style', plugin_dir_url( __FILE__ ) . 'css/wp_filter.css', 2018.12, true);
+		wp_register_style( 'wp_filter_full_style_grid', plugin_dir_url( __FILE__ ) . 'css/product_grid.css', 2018.12, true);
 		
 		wp_localize_script( 'wp_filter_djcee_script', 'djcee_ajax_object',
+			[ 'ajax_url' => admin_url( 'admin-ajax.php' ) ] );
+		wp_localize_script( 'wp_sort_djcee_script', 'djcee_ajax_object',
 			[ 'ajax_url' => admin_url( 'admin-ajax.php' ) ] );
 	}
 	
@@ -136,10 +140,14 @@ class DJC_Elementor_WooCommerce_Extensions {
 			
 			require_once $file;
 		}, [
-			'DJC_filter_bar'
+			'DJC_filter_bar',
+			'DJC_Products',
+			'DJC_Vendor_data',
 		] );
 		
 		\Elementor\Plugin::instance()->widgets_manager->register_widget_type( new \DJC_filter_bar() );
+		\Elementor\Plugin::instance()->widgets_manager->register_widget_type( new \DJC_Products() );
+		\Elementor\Plugin::instance()->widgets_manager->register_widget_type( new \DJC_Vendor_data() );
 	}
 	
 	public function init_controls()
@@ -173,6 +181,17 @@ class DJC_Elementor_WooCommerce_Extensions {
 				'icon' => 'fa fa-dollar',
 			]
 		);
+	}
+	
+	public function add_query_vars( $vars )
+	{
+		foreach(wc_get_attribute_taxonomies() as $attribute)
+		{
+			$vars[]= "pa_$attribute->attribute_name";
+		}
+		
+		$vars[] .= 'product_categorie';
+		return $vars;
 	}
 }
 
